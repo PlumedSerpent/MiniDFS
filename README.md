@@ -50,8 +50,8 @@ The project is mainly based on [MiniDFS](https://github.com/HawkAaron/MiniDFS/),
 	
 	# download using dir
 	MiniDFS > fetch2 dir/file_name save_path
-  
-        # delete file
+	
+	# delete file
         MiniDFS > rm file_id
   
 	# list meta-info of Chunks
