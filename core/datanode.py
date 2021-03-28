@@ -1,0 +1,85 @@
+from .common import *
+import os
+import shutil
+class DataNode(threading.Thread):
+    """Data Server: execute command from nameserver."""
+    
+    def __init__(self, server_id, gconf):
+        super(DataNode, self).__init__(name='DataServer%s' % (server_id,))
+        self.gconf = gconf
+        self._server_id = server_id
+
+    def run(self):
+        gconf = self.gconf
+        while True:
+            gconf.data_events[self._server_id].wait()
+            if gconf.cmd_flag:
+                if gconf.cmd_type in [COMMAND.put, COMMAND.put2] and self._server_id in gconf.server_chunk_map:
+                    self.save()
+                elif gconf.cmd_type in [COMMAND.read, COMMAND.read2]:
+                    self.read()
+                elif gconf.cmd_type in [COMMAND.namenode_format]:
+                    self.format()
+                elif gconf.cmd_type in [COMMAND.recover_chunks,COMMAND.recover_servers]:
+                    self.copy()
+                elif gconf.cmd_type in [COMMAND.rm]:
+                    self.rm()
+                else:
+                    pass
+            gconf.data_events[self._server_id].clear()
+            gconf.main_events[self._server_id].set()
+
+    def save(self):
+        """Data Node save file"""
+
+        data_node_dir = DATA_NODE_DIR % (self._server_id,)
+        with open(self.gconf.file_path, 'r') as f_in:
+            for chunk, offset, count in self.gconf.server_chunk_map[self._server_id]:
+                f_in.seek(offset, 0)
+                content = f_in.read(count)
+
+                with open(data_node_dir + os.path.sep + chunk, 'w') as f_out:
+                    f_out.write(content)
+                    f_out.flush()
+    def rm(self):
+        if self._server_id not in  self.gconf.server_chunk_map.keys():
+            return
+        data_node_dir = DATA_NODE_DIR % (self._server_id,)
+        for chunkid in self.gconf.server_chunk_map[self._server_id]:
+            os.remove("{}/{}".format(data_node_dir,chunkid))
+
+
+    def format(self):
+        data_node_dir = DATA_NODE_DIR % (self._server_id,)
+        shutil.rmtree(data_node_dir)
+        os.mkdir(data_node_dir)
+    def copy(self):
+        if self._server_id not in  self.gconf.server_chunk_map.keys():
+            return 
+        if self.gconf.cmd_type in [COMMAND.recover_servers]:
+            try:
+                os.makedirs("dfs/datanode%d"%self._server_id)
+            except: 
+                pass
+        data_node_dir = DATA_NODE_DIR % (self._server_id,)
+
+        for chunk in self.gconf.server_chunk_map[self._server_id]:
+            chunkid=list(chunk.keys())[0]
+            copyfrom=chunk[chunkid]
+            copy_data_dir= DATA_NODE_DIR % (copyfrom)+"/"+chunkid
+            with open(copy_data_dir, 'r') as f_in:
+                cont=f_in.read()
+                with open(data_node_dir + os.path.sep + chunkid, 'w') as f_out:
+                    f_out.write(cont)
+                    f_out.flush()
+
+    def read(self):
+        """read chunk according to offset and count"""
+
+        read_path = (DATA_NODE_DIR % (self._server_id,)) + os.path.sep + self.gconf.read_chunk
+
+        with open(read_path, 'r') as f_in:
+            f_in.seek(self.gconf.read_offset)
+            content = f_in.read(self.gconf.read_count)
+            print(content)
+        self.gconf.read_event.set()
