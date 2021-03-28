@@ -51,26 +51,26 @@ The project is mainly based on [MiniDFS](https://github.com/HawkAaron/MiniDFS/),
 	# download using dir
 	MiniDFS > fetch2 dir/file_name save_path
   
-  # delete file
-  MiniDFS > rm file_id
+        # delete file
+        MiniDFS > rm file_id
   
-  # list meta-info of Chunks
-  MiniDFS > meta_chunks
-  
-  # list meta-info of Replicas
-  MiniDFS > meta_replicas
-  
-  # check file integrity
-  MiniDFS > check
-  
-  # recover broken chunks
-  MiniDFS > recover_chunks
-  
-  # recover failed servers
-  MiniDFS > recover_servers
-  
-  # format dfs (clear up all files)
-  MiniDFS > namenode_format
+	# list meta-info of Chunks
+	MiniDFS > meta_chunks
+
+	# list meta-info of Replicas
+	MiniDFS > meta_replicas
+
+	# check file integrity
+	MiniDFS > check
+
+	# recover broken chunks
+	MiniDFS > recover_chunks
+
+	# recover failed servers
+	MiniDFS > recover_servers
+
+	# format dfs (clear up all files)
+	MiniDFS > namenode_format
 	# exit
 	MiniDFS > quit
 	```
