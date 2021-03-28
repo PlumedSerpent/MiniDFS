@@ -52,7 +52,7 @@ The project is mainly based on [MiniDFS](https://github.com/HawkAaron/MiniDFS/),
 	MiniDFS > fetch2 dir/file_name save_path
 	
 	# delete file
-        MiniDFS > rm file_id
+	MiniDFS > rm file_id
   
 	# list meta-info of Chunks
 	MiniDFS > meta_chunks
